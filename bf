@@ -7687,5 +7687,1460 @@ local status, err = pcall(function()
                 end)
             end
         end)
-        autostartraid = RaidSection:NewToggle("A
+        autostartraid = RaidSection:NewToggle("Auto Start Raid", function(state)
+            getgenv().EuphoriaSettings["autostartraid"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["autostartraid"] then autostartraid:UpdateToggle(nil, true) end
+        task.spawn(function()
+            while task.wait() do
+                pcall(function()
+                    if getgenv().EuphoriaSettings["autostartraid"] and not BlockRaids then
+                        curFrag = LP.Data.Fragments.Value
+                        if LP.PlayerGui.Main.Timer.Visible or isIslandNearest() then curFrag = curFrag + 1000 end
+                        if not getgenv().EuphoriaSettings["enabledmaxfrag"] or curFrag < getgenv().EuphoriaSettings["maxfrag"] then
+                            if LP.Backpack:FindFirstChild("Special Microchip") and not isIslandNearest() then
+                                if second_sea then
+                                    buttonPos = Vector3.new(-6488.0185546875, 248.6365203857422, -4527.62158203125)
+                                    for i, child in pairs(game:GetService("Workspace").Map.CircleIsland:GetChildren()) do
+                                        if child.Name == "RaidSummon2" then
+                                            if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                                                fireclickdetector(child.Button.Main.ClickDetector) 
+                                            end
+                                        end
+                                    end
+                                end
+                                if third_sea then
+                                    buttonPos = Vector3.new(-5006.56641, 322.691223, -2983.73389)
+                                    for i, child in pairs(game:GetService("Workspace").Map["Boat Castle"]:GetChildren()) do
+                                        if child.Name == "RaidSummon2" then
+                                            if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                                                fireclickdetector(child.Button.Main.ClickDetector) 
+                                            end
+                                        end
+                                    end
+                                end
+                                task.wait(10)
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+        autobuychip = RaidSection:NewToggle("Auto Buy Chip", function(state)
+            getgenv().EuphoriaSettings["autobuychip"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["autobuychip"] then autobuychip:UpdateToggle(nil, true) end
+        FakeFruit = false
+        task.spawn(function()
+            while task.wait() do
+                pcall(function()
+                    if getgenv().EuphoriaSettings["autobuychip"] and not BlockRaids and not LP.PlayerGui.Main.Timer.Visible and not isIslandNearest() then
+                        if isItemInEquip("Special Microchip") then curFrag = curFrag + 1000 end
+                        if LP.PlayerGui.Main.Timer.Visible or isIslandNearest() then curFrag = curFrag + 1000 end
+                        if not getgenv().EuphoriaSettings["enabledmaxfrag"] or curFrag < getgenv().EuphoriaSettings["maxfrag"] then
+                            task.wait(2)
+                            if getgenv().EuphoriaSettings["autobuychip"] then
+                                if isFruitsInInventory() then
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Check")
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", SelectedChip)
+                                    wait(5)
+                                    if not isChipInInventory() and isFruitsInInventory() and not isRaiding() then
+                                        FakeFruit = true
+                                    end
+                                else
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Check")
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", SelectedChip)
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+        autotradejunk = RaidSection:NewToggle("Auto Trade Fruit < 1M", function(state)
+            getgenv().EuphoriaSettings["autotradejunk"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["autotradejunk"] then autotradejunk:UpdateToggle(nil, true) end
+        function getCheapestFruit()
+            local fruits = {
+                "Rocket-Rocket",
+                "Spin-Spin",
+                "Chop-Chop",
+                "Spring-Spring",
+                "Bomb-Bomb",
+                "Smoke-Smoke",
+                "Spike-Spike",
+                "Flame-Flame",
+                "Falcon-Falcon",
+                "Ice-Ice",
+                "Sand-Sand",
+                "Dark-Dark",
+                "Diamond-Diamond",
+                "Light-Light",
+                "Rubber-Rubber",
+                "Barrier-Barrier",
+                "Ghost-Ghost",
+                "Magma-Magma"
+            }
+            myFruits = {}
+            for i,v in pairs(ReplicatedStorage.Remotes["CommF_"]:InvokeServer("getInventoryFruits")) do
+                table.insert(myFruits, v.Name)
+            end
+            for _, fr in pairs(fruits) do
+                for _, f in pairs(myFruits) do
+                    if fr == f then return fr end
+                end
+            end
+            return 0
+        end
+        function getUnusable1MFruit()
+            local fruits = {
+                "Quake-Quake",
+                "Love-Love",
+                "Phoenix-Phoenix",
+                "Spider-Spider",
+                "Pain-Pain",
+                "Gravity-Gravity",
+                "Sound-Sound",
+            }
+            local myFruits = {}
+            for i,v in pairs(ReplicatedStorage.Remotes["CommF_"]:InvokeServer("getInventoryFruits")) do
+                table.insert(myFruits, v.Name)
+            end
+            for _, fr in pairs(fruits) do
+                for _, f in pairs(myFruits) do
+                    if fr == f then return fr end
+                end
+            end
+            return 0
+        end
+        task.spawn(function()
+            while task.wait() do
+                pcall(function()
+                    task.wait(4)
+                    if getgenv().EuphoriaSettings["autotradejunk"] and not BlockRaids and getgenv().EuphoriaSettings["autobuychip"] and not isFruitsInInventory() then
+                        if isItemInEquip("Special Microchip") then
+                            _G.ChipConsumedRecently = false
+                            _G.HadAChip = true
+                        end
+                        if not isItemInEquip("Special Microchip") and _G.HadAChip then
+                            _G.HadAChip = false
+                            _G.ChipConsumedRecently = true
+                            task.wait(5)
+                            _G.ChipConsumedRecently = false
+                        end
+                    end
+                end)
+            end
+        end)
+        task.spawn(function()
+            while task.wait() do
+                pcall(function()
+                    task.wait(5)
+                    if getgenv().EuphoriaSettings["autotradejunk"] and not BlockRaids then
+                        if isItemInEquip("Special Microchip") then curFrag = curFrag + 1000 end
+                        if LP.PlayerGui.Main.Timer.Visible or isIslandNearest() then curFrag = curFrag + 1000 end
+                        if not getgenv().EuphoriaSettings["enabledmaxfrag"] or curFrag < getgenv().EuphoriaSettings["maxfrag"] then
+                            if not isItemInEquip("Special Microchip") and not _G.ChipConsumedRecently then
+                                cheapest = getCheapestFruit()
+                                if cheapest ~= 0 then
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("LoadFruit", cheapest)
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+        AutoFarmFruitsForRaid = false
+        AutoFarmFruitsForRaidToggle = RaidSection:NewToggle("Farm Fruits For Raid [ Experimental ]", function(state)
+            getgenv().EuphoriaSettings["Auto Farm Fruits For Raid"] = state
+            WriteSettings()
+            AutoFarmFruitsForRaid = state
+        end)
+        if getgenv().EuphoriaSettings["Auto Farm Fruits For Raid"] then AutoFarmFruitsForRaidToggle:UpdateToggle(nil, true) end
         
+        BlockRaids = false
+        SkipFruits = false
+        spawn(function()
+            while wait() do
+                local s,e = pcall(function()
+                    if AutoFarmFruitsForRaid and getgenv().EuphoriaSettings["autobuychip"] then
+                        if isFruitsOnServer() and not isRaiding() then
+                            BlockRaids = true
+                            _G.AutoFarmFruitsSafe = true
+                            _G.AutoStoreFruit = true
+                        else
+                            if isWorthFruitInInventory() and not SkipFruits then
+                                storeAllWorthFruits()
+                                if isWorthFruitInInventory() then
+                                    SkipFruits = true
+                                end
+                            else
+                                _G.AutoFarmFruitsSafe = false
+                                if isCheapFruitsInInventory() or isFruitsInInventory() or isChipInInventory() then
+                                    if FakeFruit then 
+                                        HopToLowestServer()
+                                    end
+                                    BlockRaids = false
+                                    _G.AutoStoreFruit = false
+                                else
+                                    if not isRaiding() and not isChipInInventory() and not isCheapFruitsInInventory() and not isFruitsInInventory() then
+                                        wait(5)
+                                        if not isRaiding() and not isChipInInventory() and not isCheapFruitsInInventory() and not isFruitsInInventory() then
+                                            HopToLowestServer()
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        BlockRaids = false
+                    end
+                end)
+                if e then print(e) end
+            end
+        end)
+
+        autoawakefruit = RaidSection:NewToggle("Auto Awake Fruit", function(state)
+            getgenv().EuphoriaSettings["autoawakefruit"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["autoawakefruit"] then autoawakefruit:UpdateToggle(nil, true) end
+        task.spawn(function()
+            while task.wait() do 
+                pcall(function()
+                    task.wait(1)
+                    if getgenv().EuphoriaSettings["autoawakefruit"] then
+                        ReplicatedStorage.Remotes.CommF_:InvokeServer("Awakener", "Check")
+                        ReplicatedStorage.Remotes.CommF_:InvokeServer("Awakener", "Awaken")
+                    end
+                end)
+            end
+        end)
+        MaxFragmentSlider = RaidSection:NewSlider("Max FRAG", 0, 20000, function(s)
+            getgenv().EuphoriaSettings["maxfrag"] = s
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["maxfrag"] then
+            MaxFragmentSlider:UpdateValue(getgenv().EuphoriaSettings["maxfrag"])
+        end
+        MaxFragmentToggle = RaidSection:NewToggle("Enable Max Fragments", function(state)
+            getgenv().EuphoriaSettings["enabledmaxfrag"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["enabledmaxfrag"] then MaxFragmentToggle:UpdateToggle(nil, true) end
+
+
+        
+        RaidSection:NewLabel(" ")
+        ChipDropdown = RaidSection:NewDropdown("Selected Chip", {"Flame","Ice","Dough","Buddha","Magma","Quake","Light","Dark","Spider","Rumble","Sand","Phoenix"}, function(chip)
+            SelectedChip = chip
+            getgenv().EuphoriaSettings["Selected Chip"] = chip
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["Selected Chip"] then
+            ChipDropdown:UpdateSelect(getgenv().EuphoriaSettings["Selected Chip"])
+        end
+        RaidSection:NewButton("Buy Selected Chip", function()
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Check")
+            ReplicatedStorage.Remotes.CommF_:InvokeServer("RaidsNpc", "Select", SelectedChip)
+        end)
+        RaidSection:NewButton("Start Left Side Raid", function()
+            if second_sea then
+                buttonPos = Vector3.new(-6488.0185546875, 248.6365203857422, -4527.62158203125)
+                for i, child in pairs(game:GetService("Workspace").Map.CircleIsland:GetChildren()) do
+                    if child.Name == "RaidSummon2" then
+                        if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                            fireclickdetector(child.Button.Main.ClickDetector) 
+                        end
+                    end
+                end
+            end
+            if third_sea then
+                buttonPos = Vector3.new(-5094.7915, 322.691223, -2948.08862)
+                for i, child in pairs(game:GetService("Workspace").Map["Boat Castle"]:GetChildren()) do
+                    if child.Name == "RaidSummon2" then
+                        if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                            fireclickdetector(child.Button.Main.ClickDetector) 
+                        end
+                    end
+                end
+            end
+        end)
+        RaidSection:NewButton("Start Right Side Raid", function()
+            if second_sea then
+                buttonPos = Vector3.new(-6465.17138671875, 248.6365203857422, -4452.00048828125)
+                for i, child in pairs(game:GetService("Workspace").Map.CircleIsland:GetChildren()) do
+                    if child.Name == "RaidSummon2" then
+                        if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                            fireclickdetector(child.Button.Main.ClickDetector) 
+                        end
+                    end
+                end
+            end
+            if third_sea then
+                buttonPos = Vector3.new(-5006.56641, 322.691223, -2983.73389)
+                for i, child in pairs(game:GetService("Workspace").Map["Boat Castle"]:GetChildren()) do
+                    if child.Name == "RaidSummon2" then
+                        if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                            fireclickdetector(child.Button.Main.ClickDetector) 
+                        end
+                    end
+                end
+            end
+        end)
+
+
+        RaidSection:NewLabel(" ")
+        TeammateCount = 1
+        TeammateCountSlider = RaidSection:NewSlider("Teammates count", 1,3, function(count)
+            getgenv().EuphoriaSettings["Teammates count raid"] = count
+            WriteSettings()
+            TeammateCount = count
+        end)
+        if getgenv().EuphoriaSettings["Teammates count raid"] then TeammateCountSlider:UpdateValue(getgenv().EuphoriaSettings["Teammates count raid"]) end
+        AutoStartWithTeammatesToggle = RaidSection:NewToggle("Auto Start With Teammates", function(state)
+            getgenv().EuphoriaSettings["Auto Start With Teammates"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["Auto Start With Teammates"] then AutoStartWithTeammatesToggle:UpdateToggle(nil, true) end
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if getgenv().EuphoriaSettings["Auto Start With Teammates"] then
+                        AutoStartWithTeammates = true
+                    else
+                        AutoStartWithTeammates = false 
+                    end
+                end)
+            end
+        end)
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if AutoStartWithTeammates and second_sea then
+                        if isItemInEquip("Special Microchip") and LP:GetAttribute("IslandRaiding") == false then
+                            buttonPos = Vector3.new(-6465.17138671875, 248.6365203857422, -4452.00048828125)
+                            for i, child in pairs(game:GetService("Workspace").Map.CircleIsland:GetChildren()) do
+                                if child.Name == "RaidSummon2" then
+                                    if (child.Button:GetPivot().Position - buttonPos).Magnitude < 15 then
+                                        count = 0
+                                        if child.Raid1.Color.BrickColor == BrickColor.new("Lime green") then
+                                            count = count + 1
+                                        end
+                                        if child.Raid2.Color.BrickColor == BrickColor.new("Lime green") then
+                                            count = count + 1
+                                        end
+                                        if child.Raid3.Color.BrickColor == BrickColor.new("Lime green") then
+                                            count = count + 1
+                                        end
+                                        if count >= TeammateCount then 
+                                            fireclickdetector(child.Button.Main.ClickDetector) 
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+
+        RaidTeammateCell = "1"
+        RaidTeammateCellDropdown = RaidSection:NewDropdown("Teammate Cell", {"1","2","3"}, function(choice)
+            getgenv().EuphoriaSettings["Raid Teammate Cell"] = choice
+            WriteSettings()
+            RaidTeammateCell = choice
+        end)
+        if getgenv().EuphoriaSettings["Raid Teammate Cell"] then RaidTeammateCellDropdown:UpdateSelect(getgenv().EuphoriaSettings["Raid Teammate Cell"]) end
+        AutoTweenToTeammateCellToggle = RaidSection:NewToggle("Auto Tween to Teammate Cell", function(state)
+            getgenv().EuphoriaSettings["Auto Tween To Mate Cell"] = state
+            WriteSettings()
+        end)
+        if getgenv().EuphoriaSettings["Auto Tween To Mate Cell"] then AutoTweenToTeammateCellToggle:UpdateToggle(nil, true) end
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if getgenv().EuphoriaSettings["Auto Tween To Mate Cell"] then
+                        AutoTweenToTeammateCell = true
+                    else
+                        AutoTweenToTeammateCell = false 
+                    end
+                end)
+            end
+        end)
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if AutoTweenToTeammateCell then
+                        if second_sea and LP:GetAttribute("IslandRaiding") == false then
+                            if RaidTeammateCell == "1" then
+                                cf = CFrame.new(-6433.14111, 263.036926, -4487.99854, -0.188667357, -8.16385324e-08, -0.982041061, -6.53594086e-08, 1, -7.05747993e-08, 0.982041061, 5.08704616e-08, -0.188667357)
+                            elseif RaidTeammateCell == "2" then
+                                cf = CFrame.new(-6439.01123, 263.037003, -4474.97168, -0.998393476, -2.55918717e-08, 0.0566606596, -2.63134812e-08, 1, -1.19895569e-08, -0.0566606596, -1.34612348e-08, -0.998393476)
+                            elseif RaidTeammateCell == "3" then
+                                cf = CFrame.new(-6445.36426, 263.036942, -4461.86426, -0.999648929, -8.89500651e-09, -0.0264959689, -8.67375594e-09, 1, -8.46528447e-09, 0.0264959689, -8.23249291e-09, -0.999648929)
+                            end
+                            useNearestEntrance(cf)
+                            toPoint(cf)
+                        end
+                    end
+                end)
+            end
+        end)
+
+        RaidSection:NewButton("Tween to raid room", function()
+            if second_sea then
+                if RaidTeammateCell == "1" then
+                    cf = CFrame.new(-6433.14111, 253.036926, -4487.99854, -0.188667357, -8.16385324e-08, -0.982041061, -6.53594086e-08, 1, -7.05747993e-08, 0.982041061, 5.08704616e-08, -0.188667357)
+                elseif RaidTeammateCell == "2" then
+                    cf = CFrame.new(-6439.01123, 253.037003, -4474.97168, -0.998393476, -2.55918717e-08, 0.0566606596, -2.63134812e-08, 1, -1.19895569e-08, -0.0566606596, -1.34612348e-08, -0.998393476)
+                elseif RaidTeammateCell == "3" then
+                    cf = CFrame.new(-6445.36426, 253.036942, -4461.86426, -0.999648929, -8.89500651e-09, -0.0264959689, -8.67375594e-09, 1, -8.46528447e-09, 0.0264959689, -8.23249291e-09, -0.999648929)
+                end
+                NoClip = true
+                if useNearestEntrance(cf) then
+                    StopTween()
+                    wait()
+                end
+                toPoint(cf)
+
+                NoClip = false
+            end
+        end)
+        
+        local SeaEventTab = Window:NewTab("Sea Event")
+        if second_sea then
+            local Sea2EventSection = SeaEventTab:NewSection("Sea 2")
+            sea2SeaBeast = nil
+            spawn(function()
+                while wait() do
+                    local _, ee123 = pcall(function()
+                        if sea2SeaBeast and (AutoSeaBeast or AutoV3Race or AutoSeaBeastRaceV3) then
+                            dismountBoat()
+                            repeat wait()
+                                toTarget(CFrame.new(sea2SeaBeast.HumanoidRootPart.CFrame.X, 60, sea2SeaBeast.HumanoidRootPart.CFrame.Z) * RandomOffsetCFrameSeaBeast())
+                            until not workspace.SeaBeasts:GetChildren() or not sea2SeaBeast or not sea2SeaBeast.Parent or sea2SeaBeast.Health.Value <= 0 or not (AutoSeaBeast or AutoV3Race or AutoSeaBeastRaceV3)
+                        end
+                    end)
+                    if ee123 then print(ee123) end
+                end
+            end)
+            function spawnSeaBeastSecondSea()
+                if #workspace.SeaBeasts:GetChildren() > 0 then
+                    dismountBoat()
+                    sea2SeaBeast = workspace.SeaBeasts:GetChildren()[1]
+                    repeat wait()
+                        if getDistance(CFrame.new(sea2SeaBeast.HumanoidRootPart.CFrame.X, 60, sea2SeaBeast.HumanoidRootPart.CFrame.Z)) < 200 then
+                            AvailableTools = {}
+                            if LP.Data.Stats.Melee.Level.Value > 500 then
+                                table.insert(AvailableTools, "Melee")
+                            end
+                            if LP.Data.Stats["Demon Fruit"].Level.Value > 500 then  
+                                table.insert(AvailableTools, "Blox Fruit")
+                            end
+                            if LP.Data.Stats.Sword.Level.Value > 500 then
+                                table.insert(AvailableTools, "Sword")
+                            end
+                            if LP.Data.Stats.Gun.Level.Value > 500 then
+                                table.insert(AvailableTools, "Gun")
+                            end
+                            for _,cTool in pairs(LP.Backpack:GetChildren()) do
+                                canUseThis = false
+                                if cTool.Name == "Buddha-Buddha" or cTool.Name == "Portal-Portal" or cTool.Name == "Control-Control" then
+                                    local skipFruitShit = 0
+                                else
+                                    for _,x in AvailableTools do
+                                        if cTool.ToolTip == x then
+                                            canUseThis = true
+                                        end
+                                    end
+                                    if canUseThis then
+                                        LP.Character.Humanoid:EquipTool(cTool)
+                                        wait(.01)
+                                        AttackSkill(sea2SeaBeast, CFrame.new(sea2SeaBeast.HumanoidRootPart.CFrame.X, 20, sea2SeaBeast.HumanoidRootPart.CFrame.Z))
+                                    end
+                                end
+                            end
+                        end
+                    until not workspace.SeaBeasts:GetChildren() or not sea2SeaBeast or not sea2SeaBeast.Parent or sea2SeaBeast.Health.Value <= 0 or not (AutoSeaBeast or AutoV3Race or AutoSeaBeastRaceV3)
+                    sea2SeaBeast = nil
+                else
+                    local myBoat = getMyBoat()
+                    if not myBoat then
+                        dealerPos = CFrame.new(92.5502396, 10.6198282, 2951.39673, 0.487601638, 1.91904554e-08, 0.873066247, 3.86592411e-08, 1, -4.3571454e-08, -0.873066247, 5.49975887e-08, 0.487601638)
+                        if getDistance(dealerPos) > 8 then
+                            if useNearestEntrance(dealerPos) then
+                                StopTween()
+                            end
+                            toPoint(dealerPos)
+                        else
+                            buyBoat()
+                        end         
+                        wait(.05)
+                        if getMyBoat() then
+                            repeat wait()
+                                toBoat()
+                            until (getMyBoat() and getMyBoat().VehicleSeat:FindFirstChild("SeatWeld")) or not (AutoSeaBeast or AutoV3Race or AutoSeaBeastRaceV3)
+                        end
+                    else
+                        if not getMyBoat().VehicleSeat:FindFirstChild("SeatWeld") then
+                            repeat wait()
+                                toBoat()
+                            until (getMyBoat() and getMyBoat().VehicleSeat:FindFirstChild("SeatWeld")) or not (AutoSeaBeast or AutoV3Race or AutoSeaBeastRaceV3)
+                        else
+                            seaBeastPositions = {
+                                CFrame.new(2311.28125, 29.00471854163, 4551.17969, -0.468381822, 3.78733755e-09, -0.883526146, 1.43722705e-08, 1, -3.3325247e-09, 0.883526146, -1.42591707e-08, -0.468381822),
+                                CFrame.new(3300.83813, 29.0047186017, 12000.30615, -0.829926491, 1.25665371e-08, -0.557872713, 1.13241205e-09, 1, 2.08411652e-08, 0.557872713, 1.66648935e-08, -0.829926491),
+                                CFrame.new(1143.73315, 29.0047185421, 15000.06543, -0.757509232, -3.84969887e-08, 0.652824461, -6.23937879e-08, 1, -1.34291565e-08, -0.652824461, -5.09049016e-08, -0.757509232),
+                                CFrame.new(-3000.4198, 29.0047186017, 5000.58301, 0.514693201, 1.09758584e-08, 0.85737443, 1.14106964e-08, 1, -1.96517007e-08, -0.85737443, 1.98978363e-08, 0.514693201)                            
+                            }
+                            for _,seaBeastPos in ipairs(seaBeastPositions) do
+                                if not getMyBoat().VehicleSeat:FindFirstChild("SeatWeld") then
+                                    break
+                                end
+                                repeat wait()
+                                    tweenBoat(seaBeastPos)
+                                until getDistance(seaBeastPos) < 100 or #workspace.SeaBeasts:GetChildren() > 0 or not (AutoSeaBeast or AutoV3Race or AutoSeaBeastRaceV3)
+                            end
+                        end
+                    end
+                end
+            end
+
+            AutoSeaBeastToggle = Sea2EventSection:NewToggle("Auto Sea Beast", function(state)
+                getgenv().EuphoriaSettings["Auto Sea Beast"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Sea Beast"] then AutoSeaBeastToggle:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if second_sea and getgenv().EuphoriaSettings["Auto Sea Beast"] then
+                            AutoSeaBeast = true
+                        else
+                            AutoSeaBeast = false
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while task.wait() do
+                    pcall(function()
+                        if second_sea and (AutoSeaBeast or AutoSeaBeastRaceV3) then
+                            spawnSeaBeastSecondSea()
+                        end
+                    end)
+                end
+            end)
+        end
+        if third_sea then 
+            local MirageSection = SeaEventTab:NewSection("Mirage")
+            DialogueStatus = MirageSection:NewLabel("Blue Gear: Loading")
+            spawn(function()
+                while wait(2) do
+                    pcall(function()
+                        if PlayerData.BlueGear then
+                            DialogueStatus:UpdateLabel("Blue Gear: ✅")
+                            return
+                        end
+                        if GetMaterial("Mirror Fractal") <= 0 or not isAccessoryInInventory("Valkyrie Helm") then
+                            tex = "Need to get"
+                            if GetMaterial("Mirror Fractal") <= 0 and not isAccessoryInInventory("Valkyrie Helm") then
+                                tex = tex .. " Mirror Fractal and Valkyrie Helm ❌"
+                            elseif not isAccessoryInInventory("Valkyrie Helm") then
+                                tex = tex .. " Valkyrie Helm ❌"
+                            elseif GetMaterial("Mirror Fractal") <= 0 then
+                                tex = tex .. " Mirror Fractal ❌"
+                            end
+                            DialogueStatus:UpdateLabel("Blue Gear: " .. tex)
+                            return
+                        end 
+                        if PlayerData.RaceVer ~= "V3" then
+                            DialogueStatus:UpdateLabel("Blue Gear: Need to get V3 Race ❌")
+                            return
+                        end
+                        if PlayerData.V4Status == 1 then
+                            DialogueStatus:UpdateLabel("Blue Gear: Need complete dialog (1/4) ❌")
+                        elseif PlayerData.V4Status == 2 then
+                            DialogueStatus:UpdateLabel("Blue Gear: Need complete dialog (2/4) ❌")
+                        elseif PlayerData.V4Status == 3 then
+                            DialogueStatus:UpdateLabel("Blue Gear: Need complete dialog (3/4) ❌")
+                        elseif PlayerData.V4Status == 4 then
+                            DialogueStatus:UpdateLabel("Blue Gear: Need to get Blue Gear ❌")
+                        end
+                    end)
+                    if PlayerData.BlueGear then break end
+                end
+            end)
+            
+            MirageIslandDistance = MirageSection:NewLabel("Mirage Distance: ")
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then
+                            MirageIslandDistance:UpdateLabel("Mirage Spawned: ✅ | " .. tostring(math.floor(getDistance(CFrame.new(game:GetService("Workspace").Map.MysticIsland.Center.Position.X,500,game:GetService("Workspace").Map.MysticIsland.Center.Position.Z)))) .. "m (" .. tostring(math.floor(getDistance(CFrame.new(game:GetService("Workspace").Map.MysticIsland.Center.Position.X,500,game:GetService("Workspace").Map.MysticIsland.Center.Position.Z)) / _G.TweenSpeed)) .. " +- seconds)")
+                        else
+                            MirageIslandDistance:UpdateLabel("Mirage Spawned: ❌")
+                        end
+                    end)
+                end
+            end)
+
+            AutoLockMoon = MirageSection:NewToggle("Auto Lock Moon", function(state)
+                getgenv().EuphoriaSettings["Auto Lock Moon"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Lock Moon"] then AutoLockMoon:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Lock Moon"] and game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then _G.AutoLockMoon = true else _G.AutoLockMoon = false end
+                    end)
+                end
+            end)
+
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if _G.AutoLockMoon then
+                            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position,game:GetService("Lighting"):GetMoonDirection() + workspace.CurrentCamera.CFrame.Position)
+                        end                
+                    end)
+                end
+            end)
+            
+            
+            TweenToMirage = MirageSection:NewToggle("Tween to Mirage [ if exists ]", function(state)
+                getgenv().EuphoriaSettings["Tween to mirage"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Tween to mirage"] then TweenToMirage:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Tween to mirage"] and game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then _G.TweenToMirage = true else _G.TweenToMirage = false end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if _G.TweenToMirage then
+                            StopTween()
+                            if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then
+                                repeat wait()
+                                    toPoint(CFrame.new(game:GetService("Workspace").Map.MysticIsland.Center.Position.X,500,game:GetService("Workspace").Map.MysticIsland.Center.Position.Z))
+                                until not game:GetService("Workspace").Map:FindFirstChild("MysticIsland") or not _G.TweenToMirage
+                            end
+                        end
+                    end)
+                end
+            end)
+
+            TweenToGear = MirageSection:NewToggle("Tween to Gear", function(state)
+                getgenv().EuphoriaSettings["Tween to Gear"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Tween to Gear"] then TweenToGear:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Tween to Gear"] and game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then _G.TweenToGear = true else _G.TweenToGear = false end
+                    end)
+                end
+            end)
+            spawn(function()
+                pcall(function()
+                    while wait() do
+                        if _G.TweenToGear then
+                            if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then
+                                for i,v in pairs(game:GetService("Workspace").Map.MysticIsland:GetChildren()) do 
+                                    if v:IsA("MeshPart")then 
+                                        if v.Material == Enum.Material.Neon then  
+                                            toPoint(v.CFrame)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end 
+                end)
+            end)
+            
+            MirageSection:NewLabel(" ")
+            AutoGearBoat = MirageSection:NewToggle("Auto Blue Gear [ Spawn Mirage ]", function(state)
+                getgenv().EuphoriaSettings["Auto Gear Boat"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Gear Boat"] then AutoGearBoat:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Gear Boat"] then 
+                            _G.AutoGearBoat = true 
+                        else 
+                            _G.AutoGearBoat = false 
+                            _G.BoatingMirage = false
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    if _G.BlueGear then break end
+                    pcall(function()
+                        if GetMaterial("Mirror Fractal") == 0 or not isAccessoryInInventory("Valkyrie Helm") then
+                            return
+                        end
+                        if PlayerData.BlueGear then
+                            return
+                        end
+                        if getgenv().EuphoriaSettings["Auto Gear Boat"] and tonumber(PlayerData.V4Status) ~= 4 and GetMaterial("Mirror Fractal") > 0 and isAccessoryInInventory("Valkyrie Helm") then
+                            if tonumber(PlayerData.V4Status) == 1 then
+                                ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","Begin")
+                                return
+                            end
+                            if tonumber(PlayerData.V4Status) == 2 then
+                                if getDistance(CFrame.new(28609.8984, 14896.5322, 106.336395, 0.0235749353, -9.18887295e-08, -0.999722064, 4.15164472e-08, 1, -9.09352522e-08, 0.999722064, -3.93611153e-08, 0.0235749353)) > 500 then
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(28282.5703125, 14896.8505859375, 105.1042709350586))
+                                    toPoint(CFrame.new(28609.8984, 14896.5322, 106.336395, 0.0235749353, -9.18887295e-08, -0.999722064, 4.15164472e-08, 1, -9.09352522e-08, 0.999722064, -3.93611153e-08, 0.0235749353))
+                                    return
+                                else
+                                    if getDistance(CFrame.new(28609.6914, 14896.5332, 106.819748, 0.211734429, -3.73081122e-09, -0.977327228, -4.00236644e-09, 1, -4.68445993e-09, 0.977327228, 4.9034834e-09, 0.211734429)) < 20 then
+                                        wait(1)
+                                        ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","TeleportBack")
+                                        wait(.5)
+                                        toPoint(CFrame.new(2956.01245, 2282.23022, -7215.73926, 0.526488245, -3.62312811e-08, -0.850182414, -4.38758612e-08, 1, -6.97866724e-08, 0.850182414, 7.40443511e-08, 0.526488245))
+                                        ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","Teleport")
+                                    end
+                                    return
+                                end
+                                return
+                            end
+                            ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","Continue")
+                            return
+                        end
+                        if _G.AutoGearBoat then
+                            if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") and tonumber(PlayerData.V4Status) == 4 then
+                                _G.BoatingMirage = false
+                                repeat wait()
+                                    dismountBoat()
+                                    stopBoat()
+                                    MiragePoint = CFrame.new(game:GetService("Workspace").Map.MysticIsland.Center.Position.X,500,game:GetService("Workspace").Map.MysticIsland.Center.Position.Z)
+                                    if useNearestEntrance(MiragePoint) then
+                                        StopTween()
+                                    end
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("SetSpawnPoint")
+                                    toPoint(MiragePoint)
+                                    gearFound = false
+                                    for i,v in pairs(game:GetService("Workspace").Map.MysticIsland:GetChildren()) do 
+                                        if v:IsA("MeshPart") then 
+                                            if v.Material == Enum.Material.Neon and v.Transparency == 0 then  
+                                                gearFound = v
+                                            end
+                                        end
+                                    end
+                                    if not gearFound then
+                                        if PlayerData.BlueGear then
+                                            return
+                                        end
+                                        if getDistance(MiragePoint) < 200 and IsNight() then
+                                            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position,game:GetService("Lighting"):GetMoonDirection() + workspace.CurrentCamera.CFrame.Position)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "T", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "T", false, game)
+                                        end
+                                    else
+                                        repeat wait()
+                                            toPoint(gearFound.CFrame)
+                                        until not gearFound or not gearFound.Parent or gearFound.Transparency == 1 or not _G.AutoGearBoat
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        game:service('VirtualInputManager'):SendKeyEvent(false, "O", false, game)
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        game:service('VirtualInputManager'):SendKeyEvent(false, "O", false, game)
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        game:service('VirtualInputManager'):SendKeyEvent(false, "O", false, game)
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                    end
+                                until not game:GetService("Workspace").Map:FindFirstChild("MysticIsland") or not _G.AutoGearBoat
+                            else
+                                _G.BoatingMirage = true
+                            end
+                        end
+                    end)
+                end
+            end)
+
+            spawn(function()
+                repeat wait() until PlayerData.BlueGear ~= nil
+                if PlayerData.BlueGear then
+                    return
+                end
+                local st, err = pcall(function()
+                    repeat wait() until PlayerData.BlueGear
+                    local Embed = {
+                        ["title"] = LP.Name,
+                        ["description"] = "```py\nBLUE GEAR FOUND```",
+                        ["type"] = "rich",
+                        ["color"] = tonumber(0xffffff),
+                        ["footer"] = {
+                            ["text"] = "e u p h o r i a =3",
+                        }
+                    };
+                    sendWebhook(
+                        webhook['misc_webhook'],
+                        "@here",
+                        Embed 
+                    )
+                end)
+                if err then print(err) end
+            end)
+
+            spawn(function()
+                while wait() do
+                    local sa, ea = pcall(function()
+                        if third_sea and _G.BoatingMirage then
+                            BoatPos = CFrame.new(-16208.5752, 9.08636189, 407.685608, 0.87449646, 1.22196955e-08, -0.485031873, 2.7691156e-08, 1, 7.51198357e-08, 0.485031873, -7.91231187e-08, 0.87449646)
+                            TikiPos = CFrame.new(-16207.3916, 9.08636189, 442.4935, -0.289960057, 1.5374928e-09, -0.95703876, 1.00728599e-07, 1, -2.89118667e-08, 0.95703876, -1.04784462e-07, -0.289960057)
+                            
+                            SeaDanger5BringPos = CFrame.new(-38409.1055, 3.35565066, 3538.43701, -0.064785257, 1.32857552e-15, 0.997899234, -1.73704636e-15, 1, -1.44414438e-15, -0.997899234, -1.82695647e-15, -0.064785257)
+                            SeaDanger5Waypoints = {
+                                CFrame.new(-46317.9414, 19.3556461, 7825.96094, -0.99994415, 3.02188639e-08, 0.0105693713, 3.11131103e-08, 1, 8.44431085e-08, -0.0105693713, 8.47672368e-08, -0.99994415),
+                                CFrame.new(-46529.7871, 16.279829, 6990.2041, 0.69260025, 3.93635951e-08, -0.721321642, 7.52798925e-08, 1, 1.26853905e-07, 0.721321642, -1.42160062e-07, 0.69260025),
+                                CFrame.new(-46814.1289, 19.3556461, 4124.68164, 0.730453014, -1.21849226e-07, 0.682962954, 6.75700704e-08, 1, 1.06144078e-07, -0.682962954, -3.13854081e-08, 0.730453014),
+                                CFrame.new(-46540.2148, 19.0456848, 382.093201, 0.964051366, -4.15628776e-08, 0.265715957, 4.25003499e-08, 1, 2.22175878e-09, -0.265715957, 9.1511323e-09, 0.964051366),
+                                CFrame.new(-48969.0781, 19.3556461, -3201.8501, 0.994422197, -1.66379905e-08, 0.105472721, 1.0503582e-08, 1, 5.87165694e-08, -0.105472721, -5.72812198e-08, 0.994422197),
+                                CFrame.new(-48257.082, 19.3556461, -6701.3335, 0.98023206, -6.88214019e-09, -0.197851136, -8.92395136e-09, 1, -7.89971892e-08, 0.197851136, 7.92011932e-08, 0.98023206),
+                                CFrame.new(-48532.4609, 19.3556461, -8530.47754, 0.76733923, -2.11108464e-09, 0.641241431, 4.2145083e-09, 1, -1.75109216e-09, -0.641241431, 4.04619893e-09, 0.76733923),
+                                CFrame.new(-48567.7969, 19.3556461, -5447.55273, -0.982734621, -2.79101684e-08, 0.185020611, -2.580847e-08, 1, 1.37676075e-08, -0.185020611, 8.75480666e-09, -0.982734621),
+                                CFrame.new(-48563.875, 19.3556461, -2665.32642, -0.956179023, -5.25171684e-09, -0.292782545, -1.50302402e-08, 1, 3.11489998e-08, 0.292782545, 3.41846125e-08, -0.956179023)
+                            }
+                            
+                            if not getMyBoat() then
+                                if getDistance(BoatPos) > 20 then
+                                    if useNearestEntrance(BoatPos) then
+                                        StopTween()
+                                    end
+                                    toPoint(BoatPos)
+                                else
+                                    buyBoat()
+                                end
+                            else
+                                if getDistanceBoat(TikiPos) < 500 then
+                                    bringBoat(SeaDanger5BringPos)
+                                end
+                                if _G.BoatingMirage and not isOnBoat() then
+                                    toBoat()
+                                end
+                                if isOnBoat() then
+                                    if not _G.SeaDanger4WaypointIndex or _G.SeaDanger4WaypointIndex > #SeaDanger5Waypoints then
+                                        _G.SeaDanger4WaypointIndex = 1
+                                    end
+                                    if getDistanceBoat(SeaDanger5Waypoints[_G.SeaDanger4WaypointIndex]) < 100 then
+                                        _G.SeaDanger4WaypointIndex = _G.SeaDanger4WaypointIndex + 1
+                                    else
+                                        tweenBoat(SeaDanger5Waypoints[_G.SeaDanger4WaypointIndex])
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                    if ea then print(ea) end
+                end
+            end)
+
+            AutoGear = MirageSection:NewToggle("Auto Blue Gear [ Default ]", function(state)
+                getgenv().EuphoriaSettings["Auto Gear"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Gear"] then AutoGear:UpdateToggle(nil, true) end
+            AutoHopIfNoMirage = MirageSection:NewToggle("Auto Hop If No Mirage", function(state)
+                getgenv().EuphoriaSettings["Auto Hop If No Mirage"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Hop If No Mirage"] then AutoHopIfNoMirage:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Hop If No Mirage"] then 
+                            _G.AutoHopIfNoMirage = true 
+                        else 
+                            _G.AutoHopIfNoMirage = false 
+                        end
+                    end)
+                end
+            end)
+
+            function IsPossibleToDoMirage()
+                if not game:GetService("Workspace").Map:FindFirstChild("MysticIsland") then return false end
+                timeForMirage = math.floor(getDistance(CFrame.new(game:GetService("Workspace").Map.MysticIsland.Center.Position.X,500,game:GetService("Workspace").Map.MysticIsland.Center.Position.Z)) / _G.TweenSpeed)
+                time = game:GetService("Lighting").ClockTime
+                if time >= 17.5 - (timeForMirage / 60) or time < 4.8 - (timeForMirage / 60) then
+                    return true
+                else
+                    return false
+                end
+            end
+
+            function IsNight()
+                time = game:GetService("Lighting").ClockTime
+                if time >= 18 then
+                    return true
+                end
+                if time < 5 then
+                    return true
+                end
+                return false
+            end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Gear"] then 
+                            _G.AutoGear = true 
+                        else 
+                            _G.AutoGear = false 
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    if _G.BlueGear then break end
+                    pcall(function()
+                        if GetMaterial("Mirror Fractal") == 0 or not isAccessoryInInventory("Valkyrie Helm") then
+                            return
+                        end
+                        if PlayerData.BlueGear then
+                            return
+                        end
+                        if getgenv().EuphoriaSettings["Auto Gear"] and tonumber(PlayerData.V4Status) ~= 4 and GetMaterial("Mirror Fractal") > 0 and isAccessoryInInventory("Valkyrie Helm") then
+                            if tonumber(PlayerData.V4Status) == 1 then
+                                ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","Begin")
+                                return
+                            end
+                            if tonumber(PlayerData.V4Status) == 2 then
+                                if getDistance(CFrame.new(28609.8984, 14896.5322, 106.336395, 0.0235749353, -9.18887295e-08, -0.999722064, 4.15164472e-08, 1, -9.09352522e-08, 0.999722064, -3.93611153e-08, 0.0235749353)) > 500 then
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance",Vector3.new(28282.5703125, 14896.8505859375, 105.1042709350586))
+                                    toPoint(CFrame.new(28609.8984, 14896.5322, 106.336395, 0.0235749353, -9.18887295e-08, -0.999722064, 4.15164472e-08, 1, -9.09352522e-08, 0.999722064, -3.93611153e-08, 0.0235749353))
+                                    return
+                                else
+                                    if getDistance(CFrame.new(28609.6914, 14896.5332, 106.819748, 0.211734429, -3.73081122e-09, -0.977327228, -4.00236644e-09, 1, -4.68445993e-09, 0.977327228, 4.9034834e-09, 0.211734429)) < 20 then
+                                        wait(1)
+                                        ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","TeleportBack")
+                                        wait(.5)
+                                        toPoint(CFrame.new(2956.01245, 2282.23022, -7215.73926, 0.526488245, -3.62312811e-08, -0.850182414, -4.38758612e-08, 1, -6.97866724e-08, 0.850182414, 7.40443511e-08, 0.526488245))
+                                        ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","Teleport")
+                                    end
+                                    return
+                                end
+                                return
+                            end
+                            ReplicatedStorage.Remotes.CommF_:InvokeServer("RaceV4Progress","Continue")
+                            return
+                        end
+                        if _G.AutoGear then
+                            if game:GetService("Workspace").Map:FindFirstChild("MysticIsland") and IsPossibleToDoMirage() and tonumber(PlayerData.V4Status) == 4 then
+                                repeat wait()
+                                    MiragePoint = CFrame.new(game:GetService("Workspace").Map.MysticIsland.Center.Position.X,500,game:GetService("Workspace").Map.MysticIsland.Center.Position.Z)
+                                    if useNearestEntrance(MiragePoint) then
+                                        StopTween()
+                                    end
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("SetSpawnPoint")
+                                    toPoint(MiragePoint)
+                                    gearFound = false
+                                    for i,v in pairs(game:GetService("Workspace").Map.MysticIsland:GetChildren()) do 
+                                        if v:IsA("MeshPart") then 
+                                            if v.Material == Enum.Material.Neon and v.Transparency == 0 then  
+                                                gearFound = v
+                                            end
+                                        end
+                                    end
+                                    if not gearFound then
+                                        if PlayerData.BlueGear then
+                                            return
+                                        end
+                                        if getDistance(MiragePoint) < 200 and IsNight() then
+                                            workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position,game:GetService("Lighting"):GetMoonDirection() + workspace.CurrentCamera.CFrame.Position)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "I", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(true, "T", false, game)
+                                            game:service('VirtualInputManager'):SendKeyEvent(false, "T", false, game)
+                                        end
+                                    else
+                                        repeat wait()
+                                            toPoint(gearFound.CFrame)
+                                        until not gearFound or not gearFound.Parent or gearFound.Transparency == 1 or not _G.AutoGear
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        wait()
+                                        game:service('VirtualInputManager'):SendKeyEvent(false, "O", false, game)
+                                        wait()
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        wait()
+                                        game:service('VirtualInputManager'):SendKeyEvent(false, "O", false, game)
+                                        wait()
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        wait()
+                                        game:service('VirtualInputManager'):SendKeyEvent(false, "O", false, game)
+                                        wait()
+                                        game:service('VirtualInputManager'):SendKeyEvent(true, "O", false, game)
+                                        wait()
+                                    end
+                                until not game:GetService("Workspace").Map:FindFirstChild("MysticIsland") or not _G.AutoGear
+                            else
+                                if getDistance(CFrame.new(-16220.6738, 28.6496544, 447.947723)) > 100 then 
+                                    if useNearestEntrance(CFrame.new(-16220.6738, 28.6496544, 447.947723)) then
+                                        StopTween()
+                                    end
+                                    toPoint(CFrame.new(-16220.6738, 28.6496544, 447.947723))
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("SetSpawnPoint")
+                                else
+                                    if _G.AutoHopIfNoMirage then
+                                        if not game:GetService("Workspace").Map:FindFirstChild("MysticIsland") and tonumber(PlayerData.V4Status) == 4 then
+                                            wait(5)
+                                            HopToLowestServer()
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+
+            local KitsuneIslandSection = SeaEventTab:NewSection("Kitsune Island")
+            AutoFindKitsuneIslandToggle = KitsuneIslandSection:NewToggle("Auto Find Kitsune Island", function(state)
+                getgenv().EuphoriaSettings["Auto Find Kitsune Island"] = state
+                stopBoat()
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Find Kitsune Island"] then AutoFindKitsuneIslandToggle:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Find Kitsune Island"] then 
+                            AutoFindKitsuneIsland = true 
+                        else 
+                            AutoFindKitsuneIsland = false 
+                            BoatingKitsuneIsland = false
+                        end
+                    end)
+                end
+            end)
+            BoatingKitsuneIsland = false
+            SeaDanger5WaypointIndex = 1
+
+            -- Script generated by SimpleSpy - credits to exx#9394
+
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if AutoFindKitsuneIsland then
+                            if game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland") then
+                                BoatingKitsuneIsland = false
+                                repeat wait()
+                                    dismountBoat()
+                                    stopBoat()
+                                    KitsuneIslandPoint = game.Workspace.Map.KitsuneIsland.ShrineActive.NeonShrinePart.CFrame * CFrame.new(0,40,10)
+                                    if useNearestEntrance(KitsuneIslandPoint) then
+                                        StopTween()
+                                    end
+                                    ReplicatedStorage.Remotes.CommF_:InvokeServer("SetSpawnPoint")
+                                    toPoint(KitsuneIslandPoint)
+                                    if getDistance(KitsuneIslandPoint) < 100 and not game:GetService("Workspace"):FindFirstChild("AttachedAzureEmber") then
+                                        game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RE/TouchKitsuneStatue"):FireServer()
+                                    elseif getDistance(KitsuneIslandPoint) < 100 then
+                                        wait(5)
+                                    end
+                                until not game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland") or not AutoFindKitsuneIsland
+                            else
+                                BoatingKitsuneIsland = true
+                            end
+                        end
+                    end)
+                end
+            end)
+
+            spawn(function()
+                while wait() do
+                    local sa, ea = pcall(function()
+                        if third_sea and BoatingKitsuneIsland then
+                            BoatPos = CFrame.new(-16208.5752, 9.08636189, 407.685608, 0.87449646, 1.22196955e-08, -0.485031873, 2.7691156e-08, 1, 7.51198357e-08, 0.485031873, -7.91231187e-08, 0.87449646)
+                            TikiPos = CFrame.new(-16207.3916, 9.08636189, 442.4935, -0.289960057, 1.5374928e-09, -0.95703876, 1.00728599e-07, 1, -2.89118667e-08, 0.95703876, -1.04784462e-07, -0.289960057)
+                            
+                            SeaDanger5BringPos = CFrame.new(-38409.1055, 3.35565066, 3538.43701, -0.064785257, 1.32857552e-15, 0.997899234, -1.73704636e-15, 1, -1.44414438e-15, -0.997899234, -1.82695647e-15, -0.064785257)
+                            SeaDanger5Waypoints = {
+                                CFrame.new(-46317.9414, 19.3556461, 7825.96094, -0.99994415, 3.02188639e-08, 0.0105693713, 3.11131103e-08, 1, 8.44431085e-08, -0.0105693713, 8.47672368e-08, -0.99994415),
+                                CFrame.new(-46529.7871, 16.279829, 6990.2041, 0.69260025, 3.93635951e-08, -0.721321642, 7.52798925e-08, 1, 1.26853905e-07, 0.721321642, -1.42160062e-07, 0.69260025),
+                                CFrame.new(-46814.1289, 19.3556461, 4124.68164, 0.730453014, -1.21849226e-07, 0.682962954, 6.75700704e-08, 1, 1.06144078e-07, -0.682962954, -3.13854081e-08, 0.730453014),
+                                CFrame.new(-46540.2148, 19.0456848, 382.093201, 0.964051366, -4.15628776e-08, 0.265715957, 4.25003499e-08, 1, 2.22175878e-09, -0.265715957, 9.1511323e-09, 0.964051366),
+                                CFrame.new(-48969.0781, 19.3556461, -3201.8501, 0.994422197, -1.66379905e-08, 0.105472721, 1.0503582e-08, 1, 5.87165694e-08, -0.105472721, -5.72812198e-08, 0.994422197),
+                                CFrame.new(-48257.082, 19.3556461, -6701.3335, 0.98023206, -6.88214019e-09, -0.197851136, -8.92395136e-09, 1, -7.89971892e-08, 0.197851136, 7.92011932e-08, 0.98023206),
+                                CFrame.new(-48532.4609, 19.3556461, -8530.47754, 0.76733923, -2.11108464e-09, 0.641241431, 4.2145083e-09, 1, -1.75109216e-09, -0.641241431, 4.04619893e-09, 0.76733923),
+                                CFrame.new(-48567.7969, 19.3556461, -5447.55273, -0.982734621, -2.79101684e-08, 0.185020611, -2.580847e-08, 1, 1.37676075e-08, -0.185020611, 8.75480666e-09, -0.982734621),
+                                CFrame.new(-48563.875, 19.3556461, -2665.32642, -0.956179023, -5.25171684e-09, -0.292782545, -1.50302402e-08, 1, 3.11489998e-08, 0.292782545, 3.41846125e-08, -0.956179023)
+                            }
+                            
+                            if not getMyBoat() then
+                                if getDistance(BoatPos) > 20 then
+                                    if useNearestEntrance(BoatPos) then
+                                        StopTween()
+                                    end
+                                    toPoint(BoatPos)
+                                else
+                                    buyBoat()
+                                end
+                            else
+                                if getDistanceBoat(TikiPos) < 500 then
+                                    bringBoat(SeaDanger5BringPos)
+                                end
+                                if BoatingKitsuneIsland and not isOnBoat() then
+                                    toBoat()
+                                end
+                                if isOnBoat() then
+                                    if not SeaDanger5WaypointIndex or SeaDanger5WaypointIndex > #SeaDanger5Waypoints then
+                                        SeaDanger5WaypointIndex = 1
+                                    end
+                                    if getDistanceBoat(SeaDanger5Waypoints[SeaDanger5WaypointIndex]) < 100 then
+                                        SeaDanger5WaypointIndex = SeaDanger5WaypointIndex + 1
+                                    else
+                                        tweenBoat(SeaDanger5Waypoints[SeaDanger5WaypointIndex])
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                    if ea then print(ea) end
+                end
+            end)
+
+            AutoCollectAzureEmberToggle = KitsuneIslandSection:NewToggle("Auto Collect Azure Ember", function(state)
+                getgenv().EuphoriaSettings["Auto Collect Azure Ember"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Collect Azure Ember"] then AutoCollectAzureEmberToggle:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Collect Azure Ember"] then 
+                            AutoCollectAzureEmber = true 
+                        else 
+                            AutoCollectAzureEmber = false
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if AutoCollectAzureEmber then
+                            if game:GetService("Workspace"):FindFirstChild("AttachedAzureEmber") then
+                                if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - game:GetService("Workspace"):WaitForChild("EmberTemplate"):FindFirstChild("Part").CFrame.Position).Magnitude > 700 then
+                                    toPoint(game:GetService("Workspace"):WaitForChild("EmberTemplate"):FindFirstChild("Part").CFrame)
+                                    game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RE/CollectBlueEmber"):FireServer()
+
+                                else
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Workspace.EmberTemplate.Part.CFrame
+                                    game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RE/CollectBlueEmber"):FireServer()
+
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+
+            AutoTradeAzureEmberToggle = KitsuneIslandSection:NewToggle("Auto Trade Azure Ember > 20", function(state)
+                getgenv().EuphoriaSettings["Auto Trade Azure Ember"] = state
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Trade Azure Ember"] then AutoTradeAzureEmberToggle:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if getgenv().EuphoriaSettings["Auto Trade Azure Ember"] then 
+                            AutoTradeAzureEmber = true 
+                        else 
+                            AutoTradeAzureEmber = false
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if AutoTradeAzureEmber then
+                            if game:GetService("Workspace").Map:FindFirstChild("KitsuneIsland") then
+                                if GetMaterial("Azure Ember") >= 20 then
+                                    game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/KitsuneStatuePray"):InvokeServer()
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+
+
+            
+
+
+            local SeaEventItems = SeaEventTab:NewSection("Sea Event Items")
+            AutoSharkAnchor = SeaEventItems:NewToggle("Auto Shark Anchor", function(state)
+                getgenv().EuphoriaSettings["Auto Shark Anchor"] = state
+                stopBoat()
+                WriteSettings()
+            end)
+            if getgenv().EuphoriaSettings["Auto Shark Anchor"] then AutoSharkAnchor:UpdateToggle(nil, true) end
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if third_sea and getgenv().EuphoriaSettings["Auto Shark Anchor"] then
+                            _G.AutoSharkAnchor = true
+                        else
+                            _G.AutoSharkAnchor = false
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait(4) do
+                    pcall(function()
+                        if _G.AutoSharkAnchor then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem","PossibleHardcode","SharkAnchor")
+                            wait(.1)
+                            if not isAccessoryInInventory("Terror Jaw") then
+                                if GetMaterial("Terror Eyes") >= 1 and GetMaterial("Mutant Tooth") >= 2 and GetMaterial("Fool's Gold") >= 10 and GetMaterial("Shark Tooth") >= 5 then
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Check", "TerrorJaw")
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "TerrorJaw")
+                                end
+                            end
+                            if not isAccessoryInInventory("Shark Tooth Necklace") then
+                                if GetMaterial("Mutant Tooth") >= 1 and GetMaterial("Shark Tooth") >= 5 then
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Check", "ToothNecklace")
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "ToothNecklace")
+                                end
+                            end
+                            if isAccessoryInInventory("Shark Tooth Necklace") and isAccessoryInInventory("Terror Jaw") then
+                                if GetMaterial("Terror Eyes") >= 2 and GetMaterial("Electric Wing") >= 8 and GetMaterial("Fool's Gold") >= 20 and GetMaterial("Shark Tooth") >= 10 then
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Check", "SharkAnchor")
+                                    wait(.1)
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CraftItem", "Craft", "SharkAnchor")
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    local sa, ea = pcall(function()
+                        if third_sea and _G.AutoSharkAnchor and not _G.AttackSeaEvent then
+                            BoatPos = CFrame.new(-16208.5752, 9.08636189, 407.685608, 0.87449646, 1.22196955e-08, -0.485031873, 2.7691156e-08, 1, 7.51198357e-08, 0.485031873, -7.91231187e-08, 0.87449646)
+                            TikiPos = CFrame.new(-16207.3916, 9.08636189, 442.4935, -0.289960057, 1.5374928e-09, -0.95703876, 1.00728599e-07, 1, -2.89118667e-08, 0.95703876, -1.04784462e-07, -0.289960057)
+                            
+                            SeaDanger5BringPos = CFrame.new(-38409.1055, 3.35565066, 3538.43701, -0.064785257, 1.32857552e-15, 0.997899234, -1.73704636e-15, 1, -1.44414438e-15, -0.997899234, -1.82695647e-15, -0.064785257)
+                            SeaDanger5Waypoints = {
+                                CFrame.new(-46317.9414, 19.3556461, 7825.96094, -0.99994415, 3.02188639e-08, 0.0105693713, 3.11131103e-08, 1, 8.44431085e-08, -0.0105693713, 8.47672368e-08, -0.99994415),
+                                CFrame.new(-46529.7871, 16.279829, 6990.2041, 0.69260025, 3.93635951e-08, -0.721321642, 7.52798925e-08, 1, 1.26853905e-07, 0.721321642, -1.42160062e-07, 0.69260025),
+                                CFrame.new(-46814.1289, 19.3556461, 4124.68164, 0.730453014, -1.21849226e-07, 0.682962954, 6.75700704e-08, 1, 1.06144078e-07, -0.682962954, -3.13854081e-08, 0.730453014),
+                                CFrame.new(-46540.2148, 19.0456848, 382.093201, 0.964051366, -4.15628776e-08, 0.265715957, 4.25003499e-08, 1, 2.22175878e-09, -0.265715957, 9.1511323e-09, 0.964051366),
+                                CFrame.new(-48969.0781, 19.3556461, -3201.8501, 0.994422197, -1.66379905e-08, 0.105472721, 1.0503582e-08, 1, 5.87165694e-08, -0.105472721, -5.72812198e-08, 0.994422197),
+                                CFrame.new(-48257.082, 19.3556461, -6701.3335, 0.98023206, -6.88214019e-09, -0.197851136, -8.92395136e-09, 1, -7.89971892e-08, 0.197851136, 7.92011932e-08, 0.98023206),
+                                CFrame.new(-48532.4609, 19.3556461, -8530.47754, 0.76733923, -2.11108464e-09, 0.641241431, 4.2145083e-09, 1, -1.75109216e-09, -0.641241431, 4.04619893e-09, 0.76733923),
+                                CFrame.new(-48567.7969, 19.3556461, -5447.55273, -0.982734621, -2.79101684e-08, 0.185020611, -2.580847e-08, 1, 1.37676075e-08, -0.185020611, 8.75480666e-09, -0.982734621),
+                                CFrame.new(-48563.875, 19.3556461, -2665.32642, -0.956179023, -5.25171684e-09, -0.292782545, -1.50302402e-08, 1, 3.11489998e-08, 0.292782545, 3.41846125e-08, -0.956179023)
+                            }
+                            
+                            if not getMyBoat() then
+                                if getDistance(BoatPos) > 20 then
+                                    if useNearestEntrance(BoatPos) then
+                                        StopTween()
+                                    end
+                                    toPoint(BoatPos)
+                                else
+                                    buyBoat()
+                                end
+                            else
+                                if getDistanceBoat(TikiPos) < 500 then
+                                    bringBoat(SeaDanger5BringPos)
+                                end
+                                if not _G.AttackSeaEvent and not isOnBoat() then
+                                    toBoat()
+                                end
+                                if isOnBoat() then
+                                    if not _G.SeaDanger4WaypointIndex or _G.SeaDanger4WaypointIndex > #SeaDanger5Waypoints then
+                                        _G.SeaDanger4WaypointIndex = 1
+                                    end
+                                    if getDistanceBoat(SeaDanger5Waypoints[_G.SeaDanger4WaypointIndex]) < 20 then
+                                        _G.SeaDanger4WaypointIndex = _G.SeaDanger4WaypointIndex + 1
+                                    else
+                                        tweenBoat(SeaDanger5Waypoints[_G.SeaDanger4WaypointIndex])
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                    if ea then print(ea) end
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if _G.AutoSharkAnchor then
+                            if GetMaterial("Monster Magnet") <= 0 then
+                                for i,v in game.Workspace.Enemies:GetChildren() do
+                                    if v.Name == "Terrorshark" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v.Humanoid.MaxHealth > 150000 then
+                                        _G.AttackSeaEvent = true
+                                        _G.SeaEventImmuneToPhys = false
+                                        _G.SeaEventTarget = v
+                                        dismountBoat()
+                                        stopBoat()
+                                        return
+                                    end
+                                end
+                                -- Terror shark
+                                for i,v in game.Workspace.Enemies:GetChildren() do
+                                    if v.Name == "Terrorshark" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                                        _G.AttackSeaEvent = true
+                                        _G.SeaEventImmuneToPhys = false
+                                        _G.SeaEventTarget = v
+                                        dismountBoat()
+                                        stopBoat()
+                                        return
+                                    end
+                                end
+                                
+                                if GetMaterial("Fool's Gold") < 30 then
+                                    for i,v in game.Workspace.Enemies:GetChildren() do
+                                        if v.Name == "PirateGrandBrigade" and v.Health.Value > 0 then
+                                            _G.AttackSeaEvent = true
+                                            _G.SeaEventImmuneToPhys = true
+                                            _G.SeaEventTarget = v
+                                            dismountBoat()
+                                            stopBoat()
+                                            return
+                                        end
+                                    end
+                                    for i,v in game.Workspace.Enemies:GetChildren() do
+                                        if v.Name == "PirateBrigade" and v.Health.Value > 0 then
+                                            _G.AttackSeaEvent = true
+                                            _G.SeaEventImmuneToPhys = true
+                                            _G.SeaEventTarget = v
+                                            dismountBoat()
+                                            stopBoat()
+                                            return
+                                        end
+                                    end
+                                    for i,v in game.Workspace.Enemies:GetChildren() do
+                                        if v.Name == "FishBoat" and v.Health.Value > 0 then
+                                            _G.AttackSeaEvent = true
+                                            _G.SeaEventImmuneToPhys = true
+                                            _G.SeaEventTarget = v
+                                            dismountBoat()
+                                            stopBoat()
+                                            return
+                                        end
+                                    end
+                                end
+                                if GetMaterial("Electric Wing") < 8 then
+                                    for i,v in game.Workspace.Enemies:GetChildren() do
+                                        if v.Name == "Piranha" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                                            _G.AttackSeaEvent = true
+                                            _G.SeaEventImmuneToPhys = false
+                                            _G.SeaEventTarget = v
+                                            dismountBoat()
+                                            stopBoat()
+                                            return
+                                        end
+                                    end
+                                end
+                                if GetMaterial("Shark Tooth") < 20 then
+                                    for i,v in game.Workspace.Enemies:GetChildren() do
+                                        if v.Name == "Shark" and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                                            _G.AttackSeaEvent = true
+                                            _G.SeaEventImmuneToPhys = false
+                                            _G.SeaEventTarget = v
+                                            dismountBoat()
+                                            stopBoat()
+                                            return
+                                        end
+                                    end
+                                end
+                                _G.AttackSeaEvent = false
+                                _G.SeaEventTarget = nil
+                                _G.SeaEventImmuneToPhys = false
+                            end
+                        end
+                        _G.AttackSeaEvent = false
+                        _G.SeaEventTarget = nil
+                        _G.SeaEventImmuneToPhys = false
+                    end)
+                end
+            end)
+            spawn(function()
+                while wait() do
+                    pcall(function()
+                        if _G.AutoSharkAnchor and _G.AttackSeaEvent and _G.SeaEventTarget then
+                            if not _G.SeaEventImmuneToPhys then
+                                repeat task.wait()
+                                    
+                                    EquipWeapon(_G.SelectWeapon)
+                                    if not _G.SeaEventDodgeState or _G.SeaEventDodgeState == 0 then
+                                        if _G.SeaEventTarget.Name == "Terrorshark" then
+                                            toTarget(_G.SeaEventTarget.HumanoidRootPart.CFrame * CFrame.new(math.random(-15, 15),54,math.random(-15, 15)))
+                                        elseif _G.SeaEventTarget.Name == "Shark" then
+                                            toTarget(_G.SeaEventTarget.HumanoidRootPart.CFrame * CFrame.new(10,30,-10))
+                                        else
+                                            toTarget(_G.SeaEventTarget.HumanoidRootPart.CFrame * CFrame.new(10,5,-10))
+                                        end
+                                    else
+                                        toTarget(_G.SeaEventTarget.HumanoidRootPart.CFrame * CFrame.new(100,240,40))
+                                    end
+                                    if _G.SeaEventTarget.Name == "Terrorshark" then
+                                        PosMon = nil
+                                        BringMobFarm = false
+                                        sethiddenproperty(LP, "SimulationRadius",  math.huge)
+                                    elseif _G.SeaEventTarget.Name == "Shark" then
+                                        PosMon = nil
+                                        BringMobFarm = false
+                                        sethiddenproperty(LP, "SimulationRadius",  math.huge)
+                                    else 
+                                        bringBoat(CFrame.new(_G.SeaEventTarget.HumanoidRootPart.CFrame.X, 0, _G.SeaEventTarget.HumanoidRootPart.CFrame.Z) * CFrame.new(40,10,0))
+                                        BringMobFarm = true
+                                        PosMon = CFrame.new(_G.SeaEventTarget.HumanoidRootPart.CFrame.X, 0, _G.SeaEventTarget.HumanoidRootPart.CFrame.Z)
+                                        _G.SeaEventTarget.HumanoidRootPart.CFrame = CFrame.new(_G.SeaEventTarget.HumanoidRootPart.CFrame.X, 0, _G.SeaEventTarget.HumanoidRootPart.CFrame.Z)
+                                        _G.SeaEventTarget.Humanoid.JumpPower = 0
+                                        _G.SeaEventTarget.Humanoid.WalkSpeed = 0
+                                        _G.SeaEventTarget.HumanoidRootPart.Size = Vector3.new(90,90,90)
+                                        _G.SeaEventTarget.HumanoidRootPart.Transparency = 1
+                                        _G.SeaEventTarget.HumanoidRootPart.CanCollide = false
+                                        _G.SeaEventTarget.Head.CanCollide = false
+                                        if _G.SeaEventTarget.Humanoid:FindFirstChild("Animator") then
+                                            _G.SeaEventTarget.Humanoid.Animator:Destroy()
+                                        end
+                                        _G.SeaEventTarget.Humanoid:ChangeState(11)
+                                        _G.SeaEventTarget.Humanoid:ChangeState(14)
+                                        sethiddenproperty(LP, "SimulationRadius",  math.huge)
+                                    end
+                                until not _G.AutoSharkAnchor or not _G.SeaEventTarget or not _G.SeaEventTarget.Parent or _G.SeaEventTarget.Humanoid.Health <= 0
+                            else
+                                repeat wait()
+                                    _G.SeaEventAttackBoat = true
+                                    if getDist
