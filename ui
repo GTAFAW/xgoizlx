@@ -50,7 +50,7 @@ Title.BorderSizePixel = 0
 Title.Position = UDim2.new(0.0859276503, 0, -0.000716221984, 0)
 Title.Size = UDim2.new(0, 480, 0, 50)
 Title.Font = Enum.Font.SourceSans
-Title.Text = "C00ZBDDKIDD GUI ( PRIVATE ) V1"
+Title.Text = "小go汉化娱乐特效🕊️"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextScaled = true
 Title.TextSize = 40.000
@@ -70,7 +70,7 @@ Oldc00l.TextScaled = true
 Oldc00l.TextSize = 14.000
 Oldc00l.TextWrapped = true
 
-k00p.Name = "k00p"
+k00p.Name = "粒子特效"
 k00p.Parent = Title
 k00p.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 k00p.BorderColor3 = Color3.fromRGB(5, 54, 0)
@@ -84,7 +84,7 @@ k00p.TextScaled = true
 k00p.TextSize = 14.000
 k00p.TextWrapped = true
 
-Playmusic.Name = "Playmusic"
+Playmusic.Name = "音效"
 Playmusic.Parent = Title
 Playmusic.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Playmusic.BorderColor3 = Color3.fromRGB(5, 54, 0)
@@ -98,7 +98,7 @@ Playmusic.TextScaled = true
 Playmusic.TextSize = 14.000
 Playmusic.TextWrapped = true
 
-hint.Name = "hint"
+hint.Name = "提示信息"
 hint.Parent = Title
 hint.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 hint.BorderColor3 = Color3.fromRGB(5, 54, 0)
@@ -112,7 +112,7 @@ hint.TextScaled = true
 hint.TextSize = 14.000
 hint.TextWrapped = true
 
-_666.Name = "666"
+_666.Name = "黑红地图火焰特效"
 _666.Parent = Title
 _666.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 _666.BorderColor3 = Color3.fromRGB(5, 54, 0)
@@ -154,7 +154,7 @@ Shutdown.TextScaled = true
 Shutdown.TextSize = 14.000
 Shutdown.TextWrapped = true
 
-disco.Name = "disco"
+disco.Name = "彩虹世界"
 disco.Parent = Title
 disco.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 disco.BorderColor3 = Color3.fromRGB(5, 54, 0)
@@ -308,7 +308,7 @@ ss4.TextScaled = true
 ss4.TextSize = 14.000
 ss4.TextWrapped = true
 
-Theyneedtodie.Name = "Theyneedtodie"
+Theyneedtodie.Name = "他们是他们的"
 Theyneedtodie.Parent = Title
 Theyneedtodie.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Theyneedtodie.BorderColor3 = Color3.fromRGB(5, 54, 0)
@@ -605,7 +605,7 @@ local function UDVYAWU_fake_script() -- hint.Script
 
 	script.Parent.MouseButton1Click:Connect(function()
 		local m = Instance.new("Hint", game.workspace)
-		m.Text = " C00ZBDDKIDD JOINED TO DESTROY HAHA!11!2!"
+		m.Text = "加入摧毁，哈哈哈"
 	end)
 end
 coroutine.wrap(UDVYAWU_fake_script)()
